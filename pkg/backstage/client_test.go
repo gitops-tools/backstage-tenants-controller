@@ -5,15 +5,19 @@ import (
 	"fmt"
 	"net/http"
 	"net/http/httptest"
+	"net/url"
+	"reflect"
 	"testing"
 
 	"github.com/google/go-cmp/cmp"
 )
 
 func TestClient_ListTeams(t *testing.T) {
-	testServer := newFakeAPI(t)
+	testServer := newFakeAPI(t, "/api/catalog/entities", url.Values{
+		"filter": []string{"kind=Group"},
+	}, "testdata/groups.json", "Bearer testing")
 
-	c := NewClient(testServer.URL, "test")
+	c := NewClient(testServer.URL, "testing")
 
 	teams, err := c.ListTeams(context.TODO())
 	if err != nil {
@@ -25,14 +29,17 @@ func TestClient_ListTeams(t *testing.T) {
 	}
 }
 
-func newFakeAPI(t *testing.T) *httptest.Server {
+func newFakeAPI(t *testing.T, urlPath string, values url.Values, filename, authToken string) *httptest.Server {
 	s := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		if r.URL.Path == "/api/catalog/entities" {
-			// w.Header().Add("Content-Type", "application/json")
-			http.ServeFile(w, r, "testdata/groups.json")
+		if v := r.Header.Get("Authorization"); v != authToken {
+			http.Error(w, fmt.Sprintf("not authorized, got %q, want %q", v, authToken), http.StatusForbidden)
 			return
 		}
-		t.Logf("URL Path = %s", r.URL.Path)
+		if r.URL.Path == urlPath && reflect.DeepEqual(r.URL.Query(), values) {
+			http.ServeFile(w, r, filename)
+			return
+		}
+		t.Logf("URL Path = %v, query = %v", r.URL.Path, r.URL.Query())
 		http.Error(w, fmt.Sprintf("%q not found", r.URL.Path), http.StatusNotFound)
 	}))
 	t.Cleanup(s.Close)
