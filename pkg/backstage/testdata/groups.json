@@ -1,0 +1,723 @@
+[
+  {
+    "metadata": {
+      "namespace": "default",
+      "annotations": {
+        "backstage.io/managed-by-location": "url:https://github.com/backstage/backstage/tree/master/packages/catalog-model/examples/acme/backstage-group.yaml",
+        "backstage.io/managed-by-origin-location": "url:https://github.com/backstage/backstage/blob/master/packages/catalog-model/examples/acme/org.yaml",
+        "backstage.io/view-url": "https://github.com/backstage/backstage/tree/master/packages/catalog-model/examples/acme/backstage-group.yaml",
+        "backstage.io/edit-url": "https://github.com/backstage/backstage/edit/master/packages/catalog-model/examples/acme/backstage-group.yaml",
+        "backstage.io/source-location": "url:https://github.com/backstage/backstage/tree/master/packages/catalog-model/examples/acme/"
+      },
+      "name": "backstage",
+      "description": "The backstage sub-department",
+      "uid": "01dd9746-2a24-48dc-b7b1-b15e34daeb8a",
+      "etag": "cdd369833e6fe1c165e66615e6e63807fc9f54ba"
+    },
+    "apiVersion": "backstage.io/v1alpha1",
+    "kind": "Group",
+    "spec": {
+      "type": "sub-department",
+      "profile": {
+        "displayName": "Backstage",
+        "email": "backstage@example.com",
+        "picture": "https://avatars.dicebear.com/api/identicon/backstage@example.com.svg?background=%23fff&margin=25"
+      },
+      "parent": "infrastructure",
+      "children": [
+        "team-a",
+        "team-b"
+      ]
+    },
+    "relations": [
+      {
+        "type": "childOf",
+        "targetRef": "group:default/infrastructure",
+        "target": {
+          "kind": "group",
+          "namespace": "default",
+          "name": "infrastructure"
+        }
+      },
+      {
+        "type": "parentOf",
+        "targetRef": "group:default/team-a",
+        "target": {
+          "kind": "group",
+          "namespace": "default",
+          "name": "team-a"
+        }
+      },
+      {
+        "type": "parentOf",
+        "targetRef": "group:default/team-b",
+        "target": {
+          "kind": "group",
+          "namespace": "default",
+          "name": "team-b"
+        }
+      }
+    ]
+  },
+  {
+    "metadata": {
+      "namespace": "default",
+      "annotations": {
+        "backstage.io/managed-by-location": "url:https://github.com/backstage/backstage/tree/master/packages/catalog-model/examples/acme/infrastructure-group.yaml",
+        "backstage.io/managed-by-origin-location": "url:https://github.com/backstage/backstage/blob/master/packages/catalog-model/examples/acme/org.yaml",
+        "backstage.io/view-url": "https://github.com/backstage/backstage/tree/master/packages/catalog-model/examples/acme/infrastructure-group.yaml",
+        "backstage.io/edit-url": "https://github.com/backstage/backstage/edit/master/packages/catalog-model/examples/acme/infrastructure-group.yaml",
+        "backstage.io/source-location": "url:https://github.com/backstage/backstage/tree/master/packages/catalog-model/examples/acme/"
+      },
+      "name": "infrastructure",
+      "description": "The infra department",
+      "uid": "6649f11f-c722-49a1-94fd-6fb4eb5d8300",
+      "etag": "dab364e00306bdb74122d77833973f87bd682dc1"
+    },
+    "apiVersion": "backstage.io/v1alpha1",
+    "kind": "Group",
+    "spec": {
+      "type": "department",
+      "parent": "acme-corp",
+      "children": [
+        "backstage",
+        "boxoffice"
+      ]
+    },
+    "relations": [
+      {
+        "type": "childOf",
+        "targetRef": "group:default/acme-corp",
+        "target": {
+          "kind": "group",
+          "namespace": "default",
+          "name": "acme-corp"
+        }
+      },
+      {
+        "type": "parentOf",
+        "targetRef": "group:default/backstage",
+        "target": {
+          "kind": "group",
+          "namespace": "default",
+          "name": "backstage"
+        }
+      },
+      {
+        "type": "parentOf",
+        "targetRef": "group:default/boxoffice",
+        "target": {
+          "kind": "group",
+          "namespace": "default",
+          "name": "boxoffice"
+        }
+      }
+    ]
+  },
+  {
+    "metadata": {
+      "namespace": "default",
+      "annotations": {
+        "backstage.io/managed-by-location": "url:https://github.com/backstage/backstage/tree/master/packages/catalog-model/examples/acme/team-b-group.yaml",
+        "backstage.io/managed-by-origin-location": "url:https://github.com/backstage/backstage/blob/master/packages/catalog-model/examples/acme/org.yaml",
+        "backstage.io/view-url": "https://github.com/backstage/backstage/tree/master/packages/catalog-model/examples/acme/team-b-group.yaml",
+        "backstage.io/edit-url": "https://github.com/backstage/backstage/edit/master/packages/catalog-model/examples/acme/team-b-group.yaml",
+        "backstage.io/source-location": "url:https://github.com/backstage/backstage/tree/master/packages/catalog-model/examples/acme/"
+      },
+      "name": "team-b",
+      "description": "Team B",
+      "uid": "b7afd2bf-0116-41a3-a24d-6adf9808ba71",
+      "etag": "162c0d52f1ff9acab92da08f758eaa074027ced3"
+    },
+    "apiVersion": "backstage.io/v1alpha1",
+    "kind": "Group",
+    "spec": {
+      "type": "team",
+      "profile": {
+        "displayName": "Team B",
+        "email": "team-b@example.com",
+        "picture": "https://avatars.dicebear.com/api/identicon/team-b@example.com.svg?background=%23fff&margin=25"
+      },
+      "parent": "backstage",
+      "children": []
+    },
+    "relations": [
+      {
+        "type": "childOf",
+        "targetRef": "group:default/backstage",
+        "target": {
+          "kind": "group",
+          "namespace": "default",
+          "name": "backstage"
+        }
+      },
+      {
+        "type": "hasMember",
+        "targetRef": "user:default/amelia.park",
+        "target": {
+          "kind": "user",
+          "namespace": "default",
+          "name": "amelia.park"
+        }
+      },
+      {
+        "type": "hasMember",
+        "targetRef": "user:default/colette.brock",
+        "target": {
+          "kind": "user",
+          "namespace": "default",
+          "name": "colette.brock"
+        }
+      },
+      {
+        "type": "hasMember",
+        "targetRef": "user:default/jenny.doe",
+        "target": {
+          "kind": "user",
+          "namespace": "default",
+          "name": "jenny.doe"
+        }
+      },
+      {
+        "type": "hasMember",
+        "targetRef": "user:default/jonathon.page",
+        "target": {
+          "kind": "user",
+          "namespace": "default",
+          "name": "jonathon.page"
+        }
+      },
+      {
+        "type": "hasMember",
+        "targetRef": "user:default/justine.barrow",
+        "target": {
+          "kind": "user",
+          "namespace": "default",
+          "name": "justine.barrow"
+        }
+      },
+      {
+        "type": "ownerOf",
+        "targetRef": "api:default/starwars-graphql",
+        "target": {
+          "kind": "api",
+          "namespace": "default",
+          "name": "starwars-graphql"
+        }
+      },
+      {
+        "type": "ownerOf",
+        "targetRef": "component:default/podcast-api",
+        "target": {
+          "kind": "component",
+          "namespace": "default",
+          "name": "podcast-api"
+        }
+      },
+      {
+        "type": "ownerOf",
+        "targetRef": "component:default/queue-proxy",
+        "target": {
+          "kind": "component",
+          "namespace": "default",
+          "name": "queue-proxy"
+        }
+      },
+      {
+        "type": "ownerOf",
+        "targetRef": "system:default/podcast",
+        "target": {
+          "kind": "system",
+          "namespace": "default",
+          "name": "podcast"
+        }
+      }
+    ]
+  },
+  {
+    "metadata": {
+      "namespace": "default",
+      "annotations": {
+        "backstage.io/managed-by-location": "url:https://github.com/backstage/backstage/tree/master/packages/catalog-model/examples/acme/boxoffice-group.yaml",
+        "backstage.io/managed-by-origin-location": "url:https://github.com/backstage/backstage/blob/master/packages/catalog-model/examples/acme/org.yaml",
+        "backstage.io/view-url": "https://github.com/backstage/backstage/tree/master/packages/catalog-model/examples/acme/boxoffice-group.yaml",
+        "backstage.io/edit-url": "https://github.com/backstage/backstage/edit/master/packages/catalog-model/examples/acme/boxoffice-group.yaml",
+        "backstage.io/source-location": "url:https://github.com/backstage/backstage/tree/master/packages/catalog-model/examples/acme/"
+      },
+      "name": "boxoffice",
+      "description": "The boxoffice sub-department",
+      "uid": "be552122-6089-4944-9733-269195726599",
+      "etag": "eee2c40ca82d73c43f06a6f4c9ddb049a55489e2"
+    },
+    "apiVersion": "backstage.io/v1alpha1",
+    "kind": "Group",
+    "spec": {
+      "type": "sub-department",
+      "profile": {
+        "displayName": "Box Office",
+        "email": "boxoffice@example.com"
+      },
+      "parent": "infrastructure",
+      "children": [
+        "team-c",
+        "team-d"
+      ]
+    },
+    "relations": [
+      {
+        "type": "childOf",
+        "targetRef": "group:default/infrastructure",
+        "target": {
+          "kind": "group",
+          "namespace": "default",
+          "name": "infrastructure"
+        }
+      },
+      {
+        "type": "parentOf",
+        "targetRef": "group:default/team-c",
+        "target": {
+          "kind": "group",
+          "namespace": "default",
+          "name": "team-c"
+        }
+      },
+      {
+        "type": "parentOf",
+        "targetRef": "group:default/team-d",
+        "target": {
+          "kind": "group",
+          "namespace": "default",
+          "name": "team-d"
+        }
+      }
+    ]
+  },
+  {
+    "metadata": {
+      "namespace": "default",
+      "annotations": {
+        "backstage.io/managed-by-location": "url:https://github.com/backstage/backstage/tree/master/packages/catalog-model/examples/acme/team-a-group.yaml",
+        "backstage.io/managed-by-origin-location": "url:https://github.com/backstage/backstage/blob/master/packages/catalog-model/examples/acme/org.yaml",
+        "backstage.io/view-url": "https://github.com/backstage/backstage/tree/master/packages/catalog-model/examples/acme/team-a-group.yaml",
+        "backstage.io/edit-url": "https://github.com/backstage/backstage/edit/master/packages/catalog-model/examples/acme/team-a-group.yaml",
+        "backstage.io/source-location": "url:https://github.com/backstage/backstage/tree/master/packages/catalog-model/examples/acme/"
+      },
+      "name": "team-a",
+      "description": "Team A",
+      "uid": "d80d2623-4808-4696-b249-20fd77ffe200",
+      "etag": "42be75e77e8a25f16fe8814ea400d09e8d656afe"
+    },
+    "apiVersion": "backstage.io/v1alpha1",
+    "kind": "Group",
+    "spec": {
+      "type": "team",
+      "profile": {
+        "email": "team-a@example.com",
+        "picture": "https://avatars.dicebear.com/api/identicon/team-a@example.com.svg?background=%23fff&margin=25"
+      },
+      "parent": "backstage",
+      "children": []
+    },
+    "relations": [
+      {
+        "type": "childOf",
+        "targetRef": "group:default/backstage",
+        "target": {
+          "kind": "group",
+          "namespace": "default",
+          "name": "backstage"
+        }
+      },
+      {
+        "type": "hasMember",
+        "targetRef": "user:default/breanna.davison",
+        "target": {
+          "kind": "user",
+          "namespace": "default",
+          "name": "breanna.davison"
+        }
+      },
+      {
+        "type": "hasMember",
+        "targetRef": "user:default/guest",
+        "target": {
+          "kind": "user",
+          "namespace": "default",
+          "name": "guest"
+        }
+      },
+      {
+        "type": "hasMember",
+        "targetRef": "user:default/janelle.dawe",
+        "target": {
+          "kind": "user",
+          "namespace": "default",
+          "name": "janelle.dawe"
+        }
+      },
+      {
+        "type": "hasMember",
+        "targetRef": "user:default/nigel.manning",
+        "target": {
+          "kind": "user",
+          "namespace": "default",
+          "name": "nigel.manning"
+        }
+      },
+      {
+        "type": "ownerOf",
+        "targetRef": "api:default/spotify",
+        "target": {
+          "kind": "api",
+          "namespace": "default",
+          "name": "spotify"
+        }
+      },
+      {
+        "type": "ownerOf",
+        "targetRef": "api:default/wayback-archive",
+        "target": {
+          "kind": "api",
+          "namespace": "default",
+          "name": "wayback-archive"
+        }
+      },
+      {
+        "type": "ownerOf",
+        "targetRef": "api:default/wayback-search",
+        "target": {
+          "kind": "api",
+          "namespace": "default",
+          "name": "wayback-search"
+        }
+      },
+      {
+        "type": "ownerOf",
+        "targetRef": "component:default/artist-lookup",
+        "target": {
+          "kind": "component",
+          "namespace": "default",
+          "name": "artist-lookup"
+        }
+      },
+      {
+        "type": "ownerOf",
+        "targetRef": "component:default/wayback-archive",
+        "target": {
+          "kind": "component",
+          "namespace": "default",
+          "name": "wayback-archive"
+        }
+      },
+      {
+        "type": "ownerOf",
+        "targetRef": "component:default/wayback-archive-storage",
+        "target": {
+          "kind": "component",
+          "namespace": "default",
+          "name": "wayback-archive-storage"
+        }
+      },
+      {
+        "type": "ownerOf",
+        "targetRef": "component:default/wayback-search",
+        "target": {
+          "kind": "component",
+          "namespace": "default",
+          "name": "wayback-search"
+        }
+      },
+      {
+        "type": "ownerOf",
+        "targetRef": "component:default/www-artist",
+        "target": {
+          "kind": "component",
+          "namespace": "default",
+          "name": "www-artist"
+        }
+      },
+      {
+        "type": "ownerOf",
+        "targetRef": "domain:default/artists",
+        "target": {
+          "kind": "domain",
+          "namespace": "default",
+          "name": "artists"
+        }
+      },
+      {
+        "type": "ownerOf",
+        "targetRef": "resource:default/artists-db",
+        "target": {
+          "kind": "resource",
+          "namespace": "default",
+          "name": "artists-db"
+        }
+      },
+      {
+        "type": "ownerOf",
+        "targetRef": "system:default/artist-engagement-portal",
+        "target": {
+          "kind": "system",
+          "namespace": "default",
+          "name": "artist-engagement-portal"
+        }
+      }
+    ]
+  },
+  {
+    "metadata": {
+      "namespace": "default",
+      "annotations": {
+        "backstage.io/managed-by-location": "url:https://github.com/backstage/backstage/tree/master/packages/catalog-model/examples/acme/team-d-group.yaml",
+        "backstage.io/managed-by-origin-location": "url:https://github.com/backstage/backstage/blob/master/packages/catalog-model/examples/acme/org.yaml",
+        "backstage.io/view-url": "https://github.com/backstage/backstage/tree/master/packages/catalog-model/examples/acme/team-d-group.yaml",
+        "backstage.io/edit-url": "https://github.com/backstage/backstage/edit/master/packages/catalog-model/examples/acme/team-d-group.yaml",
+        "backstage.io/source-location": "url:https://github.com/backstage/backstage/tree/master/packages/catalog-model/examples/acme/"
+      },
+      "name": "team-d",
+      "description": "Team D",
+      "uid": "e0c3b494-b3c2-46e1-afb3-cc4753d20097",
+      "etag": "d70f26e7c895b54f2402dd8cd1263777c131ee31"
+    },
+    "apiVersion": "backstage.io/v1alpha1",
+    "kind": "Group",
+    "spec": {
+      "type": "team",
+      "profile": {
+        "displayName": "Team D",
+        "email": "team-d@example.com",
+        "picture": "https://avatars.dicebear.com/api/identicon/team-d@example.com.svg?background=%23fff&margin=25"
+      },
+      "parent": "boxoffice",
+      "children": []
+    },
+    "relations": [
+      {
+        "type": "childOf",
+        "targetRef": "group:default/boxoffice",
+        "target": {
+          "kind": "group",
+          "namespace": "default",
+          "name": "boxoffice"
+        }
+      },
+      {
+        "type": "hasMember",
+        "targetRef": "user:default/eva.macdowell",
+        "target": {
+          "kind": "user",
+          "namespace": "default",
+          "name": "eva.macdowell"
+        }
+      },
+      {
+        "type": "hasMember",
+        "targetRef": "user:default/lucy.sheehan",
+        "target": {
+          "kind": "user",
+          "namespace": "default",
+          "name": "lucy.sheehan"
+        }
+      },
+      {
+        "type": "ownerOf",
+        "targetRef": "component:default/wayback-archive-ingestion",
+        "target": {
+          "kind": "component",
+          "namespace": "default",
+          "name": "wayback-archive-ingestion"
+        }
+      }
+    ]
+  },
+  {
+    "metadata": {
+      "namespace": "default",
+      "annotations": {
+        "backstage.io/managed-by-location": "url:https://github.com/backstage/backstage/tree/master/packages/catalog-model/examples/acme/org.yaml",
+        "backstage.io/managed-by-origin-location": "url:https://github.com/backstage/backstage/blob/master/packages/catalog-model/examples/acme/org.yaml",
+        "backstage.io/view-url": "https://github.com/backstage/backstage/tree/master/packages/catalog-model/examples/acme/org.yaml",
+        "backstage.io/edit-url": "https://github.com/backstage/backstage/edit/master/packages/catalog-model/examples/acme/org.yaml",
+        "backstage.io/source-location": "url:https://github.com/backstage/backstage/tree/master/packages/catalog-model/examples/acme/"
+      },
+      "name": "acme-corp",
+      "description": "The acme-corp organization",
+      "links": [
+        {
+          "url": "http://www.acme.com/",
+          "title": "Website"
+        },
+        {
+          "url": "https://meta.wikimedia.org/wiki/",
+          "title": "Intranet"
+        }
+      ],
+      "uid": "f43f71f5-d537-4962-95cd-589a15be6942",
+      "etag": "43afc928aed9e98de7a028ac596ddd05c39caafc"
+    },
+    "apiVersion": "backstage.io/v1alpha1",
+    "kind": "Group",
+    "spec": {
+      "type": "organization",
+      "profile": {
+        "displayName": "ACME Corp",
+        "email": "info@example.com",
+        "picture": "https://avatars.dicebear.com/api/identicon/info@example.com.svg?background=%23fff&margin=25"
+      },
+      "children": [
+        "infrastructure"
+      ]
+    },
+    "relations": [
+      {
+        "type": "parentOf",
+        "targetRef": "group:default/infrastructure",
+        "target": {
+          "kind": "group",
+          "namespace": "default",
+          "name": "infrastructure"
+        }
+      }
+    ]
+  },
+  {
+    "metadata": {
+      "namespace": "default",
+      "annotations": {
+        "backstage.io/managed-by-location": "url:https://github.com/backstage/backstage/tree/master/packages/catalog-model/examples/acme/team-c-group.yaml",
+        "backstage.io/managed-by-origin-location": "url:https://github.com/backstage/backstage/blob/master/packages/catalog-model/examples/acme/org.yaml",
+        "backstage.io/view-url": "https://github.com/backstage/backstage/tree/master/packages/catalog-model/examples/acme/team-c-group.yaml",
+        "backstage.io/edit-url": "https://github.com/backstage/backstage/edit/master/packages/catalog-model/examples/acme/team-c-group.yaml",
+        "backstage.io/source-location": "url:https://github.com/backstage/backstage/tree/master/packages/catalog-model/examples/acme/"
+      },
+      "name": "team-c",
+      "description": "Team C",
+      "uid": "fbd5c97e-6537-466f-99a9-429da1bf20b6",
+      "etag": "5c27fe7476616a4bf5192be9dfe2c14bf16226dc"
+    },
+    "apiVersion": "backstage.io/v1alpha1",
+    "kind": "Group",
+    "spec": {
+      "type": "team",
+      "profile": {
+        "displayName": "Team C",
+        "email": "team-c@example.com",
+        "picture": "https://avatars.dicebear.com/api/identicon/team-c@example.com.svg?background=%23fff&margin=25"
+      },
+      "parent": "boxoffice",
+      "children": []
+    },
+    "relations": [
+      {
+        "type": "childOf",
+        "targetRef": "group:default/boxoffice",
+        "target": {
+          "kind": "group",
+          "namespace": "default",
+          "name": "boxoffice"
+        }
+      },
+      {
+        "type": "hasMember",
+        "targetRef": "user:default/calum.leavy",
+        "target": {
+          "kind": "user",
+          "namespace": "default",
+          "name": "calum.leavy"
+        }
+      },
+      {
+        "type": "hasMember",
+        "targetRef": "user:default/frank.tiernan",
+        "target": {
+          "kind": "user",
+          "namespace": "default",
+          "name": "frank.tiernan"
+        }
+      },
+      {
+        "type": "hasMember",
+        "targetRef": "user:default/peadar.macmahon",
+        "target": {
+          "kind": "user",
+          "namespace": "default",
+          "name": "peadar.macmahon"
+        }
+      },
+      {
+        "type": "hasMember",
+        "targetRef": "user:default/sarah.gilroy",
+        "target": {
+          "kind": "user",
+          "namespace": "default",
+          "name": "sarah.gilroy"
+        }
+      },
+      {
+        "type": "hasMember",
+        "targetRef": "user:default/tara.macgovern",
+        "target": {
+          "kind": "user",
+          "namespace": "default",
+          "name": "tara.macgovern"
+        }
+      },
+      {
+        "type": "ownerOf",
+        "targetRef": "api:default/hello-world",
+        "target": {
+          "kind": "api",
+          "namespace": "default",
+          "name": "hello-world"
+        }
+      },
+      {
+        "type": "ownerOf",
+        "targetRef": "api:default/petstore",
+        "target": {
+          "kind": "api",
+          "namespace": "default",
+          "name": "petstore"
+        }
+      },
+      {
+        "type": "ownerOf",
+        "targetRef": "api:default/streetlights",
+        "target": {
+          "kind": "api",
+          "namespace": "default",
+          "name": "streetlights"
+        }
+      },
+      {
+        "type": "ownerOf",
+        "targetRef": "component:default/petstore",
+        "target": {
+          "kind": "component",
+          "namespace": "default",
+          "name": "petstore"
+        }
+      },
+      {
+        "type": "ownerOf",
+        "targetRef": "component:default/playback-sdk",
+        "target": {
+          "kind": "component",
+          "namespace": "default",
+          "name": "playback-sdk"
+        }
+      },
+      {
+        "type": "ownerOf",
+        "targetRef": "system:default/audio-playback",
+        "target": {
+          "kind": "system",
+          "namespace": "default",
+          "name": "audio-playback"
+        }
+      }
+    ]
+  }
+]
