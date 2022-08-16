@@ -1,0 +1,24 @@
+# permissions for end users to edit backstagetenantconfigs.
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: backstagetenantconfig-editor-role
+rules:
+- apiGroups:
+  - tenants.gitops.pro
+  resources:
+  - backstagetenantconfigs
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - tenants.gitops.pro
+  resources:
+  - backstagetenantconfigs/status
+  verbs:
+  - get

@@ -1,0 +1,19 @@
+domain: gitops.pro
+layout:
+- go.kubebuilder.io/v3
+plugins:
+  manifests.sdk.operatorframework.io/v2: {}
+  scorecard.sdk.operatorframework.io/v2: {}
+projectName: backstage-tenants-controller
+repo: github.com/gitops-tools/backstage-tenants-controller
+resources:
+- api:
+    crdVersion: v1
+    namespaced: true
+  controller: true
+  domain: gitops.pro
+  group: tenants
+  kind: BackstageTenantConfig
+  path: github.com/gitops-tools/backstage-tenants-controller/api/v1alpha1
+  version: v1alpha1
+version: "3"

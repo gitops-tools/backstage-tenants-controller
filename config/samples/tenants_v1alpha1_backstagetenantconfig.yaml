@@ -1,0 +1,6 @@
+apiVersion: tenants.gitops.pro/v1alpha1
+kind: BackstageTenantConfig
+metadata:
+  name: backstagetenantconfig-sample
+spec:
+  # TODO(user): Add fields here
