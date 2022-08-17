@@ -17,7 +17,7 @@ import (
 func TestClient_ListTeams(t *testing.T) {
 	testServer := newFakeAPI(t, "/api/catalog/entities", url.Values{
 		"filter": []string{"kind=Group"},
-	}, "testdata/groups.json", "Bearer testing")
+	}, "testdata/groups.json", "Bearer testing", "")
 	c := NewClient(testServer.URL, "testing")
 
 	teams, err := c.ListTeams(context.TODO())
@@ -31,10 +31,27 @@ func TestClient_ListTeams(t *testing.T) {
 	}
 }
 
+func TestClient_sets_etag(t *testing.T) {
+	testEtag := `"W/\"3f1b-lVgqz+2vTy1JnXsjdTi/dLfvQVE\""`
+	testServer := newFakeAPI(t, "/api/catalog/entities", url.Values{
+		"filter": []string{"kind=Group"},
+	}, "testdata/groups.json", "Bearer testing", testEtag)
+	c := NewClient(testServer.URL, "testing")
+
+	_, err := c.ListTeams(context.TODO())
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	if c.LastEtag != testEtag {
+		t.Fatalf("got etag %q, want %q", c.LastEtag, testEtag)
+	}
+}
+
 func TestClient_unauthenticated(t *testing.T) {
 	testServer := newFakeAPI(t, "/api/catalog/entities", url.Values{
 		"filter": []string{"kind=Group"},
-	}, "testdata/groups.json", "")
+	}, "testdata/groups.json", "", "")
 	c := NewClient(testServer.URL, "")
 
 	teams, err := c.ListTeams(context.TODO())
@@ -51,7 +68,7 @@ func TestClient_unauthenticated(t *testing.T) {
 func TestClient_unauthorized(t *testing.T) {
 	testServer := newFakeAPI(t, "/api/catalog/entities", url.Values{
 		"filter": []string{"kind=Group"},
-	}, "testdata/groups.json", "Bearer password")
+	}, "testdata/groups.json", "Bearer password", "")
 	c := NewClient(testServer.URL, "")
 
 	_, err := c.ListTeams(context.TODO())
@@ -81,7 +98,7 @@ func TestClient_bad_content(t *testing.T) {
 	c := NewClient(s.URL, "")
 
 	_, err := c.ListTeams(context.TODO())
-	test.AssertErrorMatch(t, `unexpected Content-Type "text/plain; charset=utf-8"`, err)
+	test.AssertErrorMatch(t, `unexpected Content-Type "text/plain"`, err)
 }
 
 func TestClient_bad_response(t *testing.T) {
@@ -100,11 +117,14 @@ func TestClient_timeout(t *testing.T) {
 	// https://github.com/google/go-github/blob/f2d99f17ead8dd906d8598ac43f99996b647a614/github/github.go#L647
 }
 
-func newFakeAPI(t *testing.T, urlPath string, values url.Values, filename, authToken string) *httptest.Server {
+func newFakeAPI(t *testing.T, urlPath string, values url.Values, filename, authToken, etag string) *httptest.Server {
 	s := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		if v := r.Header.Get("Authorization"); v != authToken {
 			http.Error(w, fmt.Sprintf("not authorized, got %q, want %q", v, authToken), http.StatusForbidden)
 			return
+		}
+		if etag != "" {
+			w.Header().Set("Etag", etag)
 		}
 		if r.URL.Path == urlPath && reflect.DeepEqual(r.URL.Query(), values) {
 			http.ServeFile(w, r, filename)

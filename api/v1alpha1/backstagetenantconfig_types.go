@@ -55,8 +55,13 @@ type ResourceRef struct {
 // BackstageTenantConfigStatus defines the observed state of BackstageTenantConfig
 type BackstageTenantConfigStatus struct {
 	// TeamNames are the teams discovered from the Backstage API.
-	TeamNames       []string                           `json:"teamNames"`
-	TenantInventory map[string]TenantResourceInventory `json:"tenantInventory"`
+	TeamNames []string `json:"teamNames,omitempty"`
+	// TenantInventory is a mapping from team to the resources generated as a
+	// Tenant.
+	TenantInventory map[string]TenantResourceInventory `json:"tenantInventory,omitempty"`
+
+	// LastEtag is the last recorded etag header from the upstream API.
+	LastEtag string `json:"lastEtag"`
 }
 
 //+kubebuilder:object:root=true

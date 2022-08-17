@@ -18,13 +18,17 @@ package controllers
 
 import (
 	"context"
+	"encoding/json"
+	"fmt"
 
 	"k8s.io/apimachinery/pkg/runtime"
+	"k8s.io/apimachinery/pkg/types"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/log"
 
-	tenantsv1alpha1 "github.com/gitops-tools/backstage-tenants-controller/api/v1alpha1"
+	tenantsv1 "github.com/gitops-tools/backstage-tenants-controller/api/v1alpha1"
+	"github.com/gitops-tools/backstage-tenants-controller/pkg/backstage"
 )
 
 // BackstageTenantConfigReconciler reconciles a BackstageTenantConfig object
@@ -39,17 +43,36 @@ type BackstageTenantConfigReconciler struct {
 
 // Reconcile is part of the main kubernetes reconciliation loop which aims to
 // move the current state of the cluster closer to the desired state.
-// TODO(user): Modify the Reconcile function to compare the state specified by
-// the BackstageTenantConfig object against the actual cluster state, and then
-// perform operations to make the cluster state reflect the state specified by
-// the user.
-//
-// For more details, check Reconcile and its Result here:
-// - https://pkg.go.dev/sigs.k8s.io/controller-runtime@v0.12.1/pkg/reconcile
 func (r *BackstageTenantConfigReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Result, error) {
 	_ = log.FromContext(ctx)
+	// TODO: metrics!
 
-	// TODO(user): your logic here
+	cfg := &tenantsv1.BackstageTenantConfig{}
+	if err := r.Get(ctx, req.NamespacedName, cfg); err != nil {
+		// TODO: check for deleted etc.
+		return ctrl.Result{}, client.IgnoreNotFound(err)
+	}
+
+	// TODO: Auth if available!
+	bc := backstage.NewClient(cfg.Spec.BaseURL, "")
+	names, err := bc.ListTeams(ctx)
+	if err != nil {
+		return ctrl.Result{}, err
+	}
+
+	// TODO: Flux patchHelper?
+	patch, err := json.Marshal(map[string]interface{}{
+		"status": map[string]interface{}{
+			"teamNames": names,
+			"lastEtag":  bc.LastEtag,
+		},
+	})
+	if err != nil {
+		return ctrl.Result{}, err
+	}
+	if err := r.Status().Patch(ctx, cfg, client.RawPatch(types.MergePatchType, patch)); err != nil {
+		return ctrl.Result{}, fmt.Errorf("failed to update config: %w", err)
+	}
 
 	return ctrl.Result{}, nil
 }
@@ -57,6 +80,6 @@ func (r *BackstageTenantConfigReconciler) Reconcile(ctx context.Context, req ctr
 // SetupWithManager sets up the controller with the Manager.
 func (r *BackstageTenantConfigReconciler) SetupWithManager(mgr ctrl.Manager) error {
 	return ctrl.NewControllerManagedBy(mgr).
-		For(&tenantsv1alpha1.BackstageTenantConfig{}).
+		For(&tenantsv1.BackstageTenantConfig{}).
 		Complete(r)
 }

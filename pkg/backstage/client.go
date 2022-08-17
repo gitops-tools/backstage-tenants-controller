@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
+	"mime"
 	"net/http"
 	"net/url"
 	"path"
@@ -13,9 +14,13 @@ import (
 
 // Client is a Backstage client for querying entities.
 type Client struct {
-	BaseURL   string
+	// BaseURL is the base URL for the Backstage API.
+	BaseURL string
+	// This is a Bearer tokem for when the Backstage requires auth.
 	AuthToken string
-	client    *http.Client
+	// This is updated with the Etag when a request returns an Etag.
+	LastEtag string
+	client   *http.Client
 }
 
 // NewClient creates and returns a client ready for use.
@@ -34,7 +39,7 @@ func NewClient(BaseURL, auth string) *Client {
 // https://backstage.io/docs/features/software-catalog/descriptor-format#kind-group
 //
 // e.g. https://demo.backstage.io/api/catalog/entities?filter=kind=group
-func (c Client) ListTeams(ctx context.Context) ([]string, error) {
+func (c *Client) ListTeams(ctx context.Context) ([]string, error) {
 	entities, err := c.queryEntities(ctx, map[string]string{
 		"kind": "Group",
 	})
@@ -57,7 +62,7 @@ func (c Client) ListTeams(ctx context.Context) ([]string, error) {
 	return teams, nil
 }
 
-func (c Client) queryEntities(ctx context.Context, filter map[string]string) ([]entity, error) {
+func (c *Client) queryEntities(ctx context.Context, filter map[string]string) ([]entity, error) {
 	apiURL, err := entitiesURL(c.BaseURL, filter)
 	if err != nil {
 		return nil, fmt.Errorf("calculating API URL: %w", err)
@@ -81,9 +86,14 @@ func (c Client) queryEntities(ctx context.Context, filter map[string]string) ([]
 		return nil, fmt.Errorf("unexpected response status %v", res.StatusCode)
 	}
 
-	if h := res.Header.Get("Content-Type"); h != "application/json" {
-		return nil, fmt.Errorf("unexpected Content-Type %q", h)
+	mediatype, _, err := mime.ParseMediaType(res.Header.Get("Content-Type"))
+	if err != nil {
+		return nil, fmt.Errorf("parsing Content-Type %q: %w", mediatype, err)
 	}
+	if mediatype != "application/json" {
+		return nil, fmt.Errorf("unexpected Content-Type %q", mediatype)
+	}
+
 	b, err := ioutil.ReadAll(res.Body)
 	if err != nil {
 		return nil, fmt.Errorf("reading response: %w", err)
@@ -93,6 +103,8 @@ func (c Client) queryEntities(ctx context.Context, filter map[string]string) ([]
 	if err != nil {
 		return nil, fmt.Errorf("parsing response body: %w", err)
 	}
+	c.LastEtag = res.Header.Get("Etag")
+
 	return entities, nil
 }
 
