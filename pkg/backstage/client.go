@@ -78,20 +78,20 @@ func (c Client) queryEntities(ctx context.Context, filter map[string]string) ([]
 	defer res.Body.Close()
 
 	if res.StatusCode != http.StatusOK {
-		return nil, fmt.Errorf("got %v response, want %v", http.StatusOK, res.StatusCode)
+		return nil, fmt.Errorf("unexpected response status %v", res.StatusCode)
 	}
 
 	if h := res.Header.Get("Content-Type"); h != "application/json" {
-		return nil, fmt.Errorf("got Content-Type %q", h)
+		return nil, fmt.Errorf("unexpected Content-Type %q", h)
 	}
 	b, err := ioutil.ReadAll(res.Body)
 	if err != nil {
-		return nil, fmt.Errorf("failed to read response: %w", err)
+		return nil, fmt.Errorf("reading response: %w", err)
 	}
 	entities := []entity{}
 	err = json.Unmarshal(b, &entities)
 	if err != nil {
-		return nil, fmt.Errorf("failed to parse response body: %w", err)
+		return nil, fmt.Errorf("parsing response body: %w", err)
 	}
 	return entities, nil
 }
