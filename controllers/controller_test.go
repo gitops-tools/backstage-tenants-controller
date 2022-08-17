@@ -5,7 +5,7 @@ Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
 You may obtain a copy of the License at
 
-    http://www.apache.org/licenses/LICENSE-2.0
+	http://www.apache.org/licenses/LICENSE-2.0
 
 Unless required by applicable law or agreed to in writing, software
 distributed under the License is distributed on an "AS IS" BASIS,
@@ -28,6 +28,7 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/envtest"
 
 	tenantsv1 "github.com/gitops-tools/backstage-tenants-controller/api/v1alpha1"
+	"github.com/gitops-tools/backstage-tenants-controller/pkg/backstage"
 	"github.com/google/go-cmp/cmp"
 )
 
@@ -71,9 +72,13 @@ func TestAPIs(t *testing.T) {
 		}
 		defer cleanupResource(t, k8sClient, cfg)
 
-		_, err := reconciler.Reconcile(ctx, ctrl.Request{NamespacedName: client.ObjectKeyFromObject(cfg)})
+		res, err := reconciler.Reconcile(ctx, ctrl.Request{NamespacedName: client.ObjectKeyFromObject(cfg)})
 		if err != nil {
 			t.Fatal(err)
+		}
+
+		if res.RequeueAfter != cfg.Spec.Interval.Duration {
+			t.Fatalf("got RequeueAfter %v, want %v", res.RequeueAfter, cfg.Spec.Interval)
 		}
 
 		updated := &tenantsv1.BackstageTenantConfig{}
@@ -88,6 +93,41 @@ func TestAPIs(t *testing.T) {
 		// the current Etag is.
 		if updated.Status.LastEtag == "" {
 			t.Fatal("expected Status.LastEtag to not be empty")
+		}
+	})
+
+	t.Run("querying with current Etag", func(t *testing.T) {
+		ctx := context.TODO()
+		cfg := newTestConfig()
+		if err := k8sClient.Create(ctx, cfg); err != nil {
+			t.Fatal(err)
+		}
+		defer cleanupResource(t, k8sClient, cfg)
+
+		bc := backstage.NewClient(cfg.Spec.BaseURL, "")
+		_, err := bc.ListTeams(ctx)
+		cfg.Status.LastEtag = bc.LastEtag
+		if err := k8sClient.Status().Update(ctx, cfg); err != nil {
+			t.Fatal(err)
+		}
+
+		res, err := reconciler.Reconcile(ctx, ctrl.Request{NamespacedName: client.ObjectKeyFromObject(cfg)})
+		if err != nil {
+			t.Fatal(err)
+		}
+
+		if res.RequeueAfter != cfg.Spec.Interval.Duration {
+			t.Fatalf("got RequeueAfter %v, want %v", res.RequeueAfter, cfg.Spec.Interval)
+		}
+
+		// Because the Etag matches, we get no teams and so the teams don't get
+		// stored.
+		updated := &tenantsv1.BackstageTenantConfig{}
+		if err := k8sClient.Get(ctx, client.ObjectKeyFromObject(cfg), updated); err != nil {
+			t.Fatal(err)
+		}
+		if len(updated.Status.TeamNames) != 0 {
+			t.Fatalf("want no teams, got %v", updated.Status.TeamNames)
 		}
 	})
 

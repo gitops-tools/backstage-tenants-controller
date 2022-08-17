@@ -3,4 +3,5 @@ kind: BackstageTenantConfig
 metadata:
   name: backstagetenantconfig-sample
 spec:
-  # TODO(user): Add fields here
+  baseURL:  https://demo.backstage.io/
+  interval: 10s

@@ -46,6 +46,9 @@ func (c *Client) ListTeams(ctx context.Context) ([]string, error) {
 	if err != nil {
 		return nil, err
 	}
+	if entities == nil {
+		return nil, nil
+	}
 
 	teams := []string{}
 	for _, v := range entities {
@@ -75,12 +78,19 @@ func (c *Client) queryEntities(ctx context.Context, filter map[string]string) ([
 	if c.AuthToken != "" {
 		req.Header.Set("Authorization", "Bearer "+c.AuthToken)
 	}
+	if c.LastEtag != "" {
+		req.Header.Set("If-None-Match", c.LastEtag)
+	}
 
 	res, err := c.client.Do(req)
 	if err != nil {
 		return nil, fmt.Errorf("failed to execute request: %w", err)
 	}
 	defer res.Body.Close()
+
+	if c.LastEtag != "" && res.StatusCode == http.StatusNotModified {
+		return nil, nil
+	}
 
 	if res.StatusCode != http.StatusOK {
 		return nil, fmt.Errorf("unexpected response status %v", res.StatusCode)

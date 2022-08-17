@@ -15,8 +15,8 @@ limitations under the License.
 */
 
 // Package v1alpha1 contains API Schema definitions for the tenants v1alpha1 API group
-//+kubebuilder:object:generate=true
-//+groupName=tenants.gitops.pro
+// +kubebuilder:object:generate=true
+// +groupName=tenants.gitops.pro
 package v1alpha1
 
 import (

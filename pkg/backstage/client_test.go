@@ -48,6 +48,24 @@ func TestClient_sets_etag(t *testing.T) {
 	}
 }
 
+func TestClient_sending_etag(t *testing.T) {
+	testEtag := `"W/\"3f1b-lVgqz+2vTy1JnXsjdTi/dLfvQVE\""`
+	testServer := newFakeAPI(t, "/api/catalog/entities", url.Values{
+		"filter": []string{"kind=Group"},
+	}, "testdata/groups.json", "Bearer testing", testEtag)
+	c := NewClient(testServer.URL, "testing")
+	c.LastEtag = testEtag
+
+	teams, err := c.ListTeams(context.TODO())
+	if err != nil {
+		t.Fatal(err)
+	}
+	if teams != nil {
+		t.Fatalf("expected no teams when etag matched, got %v", teams)
+	}
+
+}
+
 func TestClient_unauthenticated(t *testing.T) {
 	testServer := newFakeAPI(t, "/api/catalog/entities", url.Values{
 		"filter": []string{"kind=Group"},
@@ -121,6 +139,14 @@ func newFakeAPI(t *testing.T, urlPath string, values url.Values, filename, authT
 	s := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		if v := r.Header.Get("Authorization"); v != authToken {
 			http.Error(w, fmt.Sprintf("not authorized, got %q, want %q", v, authToken), http.StatusForbidden)
+			return
+		}
+		if v := r.Header.Get("If-None-Match"); v != "" {
+			if v != etag {
+				http.Error(w, fmt.Sprintf("invalid Etag %q", v), http.StatusBadRequest)
+				return
+			}
+			w.WriteHeader(http.StatusNotModified)
 			return
 		}
 		if etag != "" {

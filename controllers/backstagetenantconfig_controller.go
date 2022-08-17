@@ -44,8 +44,10 @@ type BackstageTenantConfigReconciler struct {
 // Reconcile is part of the main kubernetes reconciliation loop which aims to
 // move the current state of the cluster closer to the desired state.
 func (r *BackstageTenantConfigReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Result, error) {
-	_ = log.FromContext(ctx)
+	logger := log.FromContext(ctx)
 	// TODO: metrics!
+	// TODO: observedGeneration
+	// TODO: handle deleted configs
 
 	cfg := &tenantsv1.BackstageTenantConfig{}
 	if err := r.Get(ctx, req.NamespacedName, cfg); err != nil {
@@ -53,17 +55,27 @@ func (r *BackstageTenantConfigReconciler) Reconcile(ctx context.Context, req ctr
 		return ctrl.Result{}, client.IgnoreNotFound(err)
 	}
 
+	logger.Info("reconciling Backstage tenants", "baseURL", cfg.Spec.BaseURL)
 	// TODO: Auth if available!
 	bc := backstage.NewClient(cfg.Spec.BaseURL, "")
-	names, err := bc.ListTeams(ctx)
+	// TODO: shift this to the client constructor or to the ListTeams() call?
+	bc.LastEtag = cfg.Status.LastEtag
+
+	teams, err := bc.ListTeams(ctx)
 	if err != nil {
 		return ctrl.Result{}, err
 	}
+	if teams == nil {
+		logger.Info("team data has not changed")
+		return ctrl.Result{RequeueAfter: cfg.Spec.Interval.Duration}, nil
+	}
+
+	logger.Info("fetched teams", "count", len(teams))
 
 	// TODO: Flux patchHelper?
 	patch, err := json.Marshal(map[string]interface{}{
 		"status": map[string]interface{}{
-			"teamNames": names,
+			"teamNames": teams,
 			"lastEtag":  bc.LastEtag,
 		},
 	})
@@ -74,7 +86,7 @@ func (r *BackstageTenantConfigReconciler) Reconcile(ctx context.Context, req ctr
 		return ctrl.Result{}, fmt.Errorf("failed to update config: %w", err)
 	}
 
-	return ctrl.Result{}, nil
+	return ctrl.Result{RequeueAfter: cfg.Spec.Interval.Duration}, nil
 }
 
 // SetupWithManager sets up the controller with the Manager.
