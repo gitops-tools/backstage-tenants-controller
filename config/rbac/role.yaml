@@ -1,0 +1,33 @@
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  creationTimestamp: null
+  name: manager-role
+rules:
+- apiGroups:
+  - tenants.gitops.pro
+  resources:
+  - backstagetenantconfigs
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - tenants.gitops.pro
+  resources:
+  - backstagetenantconfigs/finalizers
+  verbs:
+  - update
+- apiGroups:
+  - tenants.gitops.pro
+  resources:
+  - backstagetenantconfigs/status
+  verbs:
+  - get
+  - patch
+  - update

@@ -20,22 +20,43 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
-// EDIT THIS FILE!  THIS IS SCAFFOLDING FOR YOU TO OWN!
-// NOTE: json tags are required.  Any new fields you add must have json tags for the fields to be serialized.
-
 // BackstageTenantConfigSpec defines the desired state of BackstageTenantConfig
 type BackstageTenantConfigSpec struct {
-	// INSERT ADDITIONAL SPEC FIELDS - desired state of cluster
-	// Important: Run "make" to regenerate code after modifying this file
+	// BaseURL specifies the Backstage API base URL, it can be an HTTP/S
+	// address.
+	// See https://backstage.io/docs/features/software-catalog/software-catalog-api
+	//
+	// +kubebuilder:validation:Pattern="^(http|https)://.*$"
+	// +required
+	BaseURL string `json:"baseURL"`
 
-	// Foo is an example field of BackstageTenantConfig. Edit backstagetenantconfig_types.go to remove/update
-	Foo string `json:"foo,omitempty"`
+	// Interval at which to check the Backstage API for updates.
+	// +required
+	Interval metav1.Duration `json:"interval"`
+}
+
+// TenantResourceInventory contains a list of Kubernetes resource object references
+// that have been created for tenants.
+type TenantResourceInventory struct {
+	// Entries of Kubernetes resource object references.
+	Entries []ResourceRef `json:"entries"`
+}
+
+// ResourceRef contains the information necessary to locate a resource within a cluster.
+type ResourceRef struct {
+	// ID is the string representation of the Kubernetes resource object's metadata,
+	// in the format '<namespace>_<name>_<group>_<kind>'.
+	ID string `json:"id"`
+
+	// Version is the API version of the Kubernetes resource object's kind.
+	Version string `json:"v"`
 }
 
 // BackstageTenantConfigStatus defines the observed state of BackstageTenantConfig
 type BackstageTenantConfigStatus struct {
-	// INSERT ADDITIONAL STATUS FIELD - define observed state of cluster
-	// Important: Run "make" to regenerate code after modifying this file
+	// TeamNames are the teams discovered from the Backstage API.
+	TeamNames       []string                           `json:"teamNames"`
+	TenantInventory map[string]TenantResourceInventory `json:"tenantInventory"`
 }
 
 //+kubebuilder:object:root=true
