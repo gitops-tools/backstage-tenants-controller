@@ -72,10 +72,14 @@ func (r *BackstageTenantConfigReconciler) Reconcile(ctx context.Context, req ctr
 
 	logger.Info("fetched teams", "count", len(teams))
 
+	teamNames := make([]string, len(teams))
+	for i, v := range teams {
+		teamNames[i] = v.Name
+	}
 	// TODO: Flux patchHelper?
 	patch, err := json.Marshal(map[string]interface{}{
 		"status": map[string]interface{}{
-			"teamNames": teams,
+			"teamNames": teamNames,
 			"lastEtag":  bc.LastEtag,
 		},
 	})

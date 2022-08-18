@@ -104,6 +104,9 @@ func TestAPIs(t *testing.T) {
 		}
 		defer cleanupResource(t, k8sClient, cfg)
 
+		// initialise the config with the current etag for the data.
+		// theoretically, this could fail if there was a change to the upstream
+		// data between here and the reconcile call.
 		bc := backstage.NewClient(cfg.Spec.BaseURL, "")
 		_, err := bc.ListTeams(ctx)
 		cfg.Status.LastEtag = bc.LastEtag

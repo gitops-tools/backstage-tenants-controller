@@ -25,7 +25,56 @@ func TestClient_ListTeams(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	want := []string{"team-a", "team-b", "team-c", "team-d"}
+	want := []Team{
+		{
+			Name:        "team-a",
+			Namespace:   "default",
+			Description: "Team A",
+			UID:         "d80d2623-4808-4696-b249-20fd77ffe200",
+			Members: []TeamMember{
+				{Name: "breanna.davison", Namespace: "default"},
+				{Name: "guest", Namespace: "default"},
+				{Name: "janelle.dawe", Namespace: "default"},
+				{Name: "nigel.manning", Namespace: "default"},
+			},
+		},
+		{
+			Name:        "team-b",
+			Namespace:   "default",
+			Description: "Team B",
+			UID:         "b7afd2bf-0116-41a3-a24d-6adf9808ba71",
+			Members: []TeamMember{
+				{Name: "amelia.park", Namespace: "default"},
+				{Name: "colette.brock", Namespace: "default"},
+				{Name: "jenny.doe", Namespace: "default"},
+				{Name: "jonathon.page", Namespace: "default"},
+				{Name: "justine.barrow", Namespace: "default"},
+			},
+		},
+		{
+			Name:        "team-c",
+			Namespace:   "default",
+			Description: "Team C",
+			UID:         "fbd5c97e-6537-466f-99a9-429da1bf20b6",
+			Members: []TeamMember{
+				{Name: "calum.leavy", Namespace: "default"},
+				{Name: "frank.tiernan", Namespace: "default"},
+				{Name: "peadar.macmahon", Namespace: "default"},
+				{Name: "sarah.gilroy", Namespace: "default"},
+				{Name: "tara.macgovern", Namespace: "default"},
+			},
+		},
+		{
+			Name:        "team-d",
+			Namespace:   "default",
+			Description: "Team D",
+			UID:         "e0c3b494-b3c2-46e1-afb3-cc4753d20097",
+			Members: []TeamMember{
+				{Name: "eva.macdowell", Namespace: "default"},
+				{Name: "lucy.sheehan", Namespace: "default"},
+			},
+		},
+	}
 	if diff := cmp.Diff(want, teams); diff != "" {
 		t.Fatalf("failed to get teams:\n%s", diff)
 	}
@@ -77,9 +126,9 @@ func TestClient_unauthenticated(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	want := []string{"team-a", "team-b", "team-c", "team-d"}
-	if diff := cmp.Diff(want, teams); diff != "" {
-		t.Fatalf("failed to get teams:\n%s", diff)
+	// This gets the same teams as the ListTeams test.
+	if l := len(teams); l != 4 {
+		t.Fatalf("got %v teams, want 4", l)
 	}
 }
 

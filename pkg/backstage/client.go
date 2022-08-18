@@ -12,6 +12,30 @@ import (
 	"sort"
 )
 
+// Team represents the information Backstage has about a Group entity of type
+// Team.
+type Team struct {
+	// Name is the name of the Group.
+	Name string
+	// Namespace is the namespace of the Group.
+	Namespace string
+	// Description is the Group description.
+	Description string
+	// UID is the Unique ID of the Group.
+	UID string
+
+	// Members is a list of the members of the team.
+	Members []TeamMember
+}
+
+// TeamMember is a user who is a member of the team.
+type TeamMember struct {
+	// Name is the username.
+	Name string `json:"name"`
+	// Namespace is the namespace that provides scope for the Name.
+	Namespace string `json:"namespace"`
+}
+
 // Client is a Backstage client for querying entities.
 type Client struct {
 	// BaseURL is the base URL for the Backstage API.
@@ -32,39 +56,56 @@ func NewClient(BaseURL, auth string) *Client {
 	}
 }
 
-// ListTeams lists Groups of Type team
+// ListTeams lists Groups of Type team.
 //
 // https://backstage.io/docs/features/software-catalog/software-catalog-api
 //
 // https://backstage.io/docs/features/software-catalog/descriptor-format#kind-group
 //
 // e.g. https://demo.backstage.io/api/catalog/entities?filter=kind=group
-func (c *Client) ListTeams(ctx context.Context) ([]string, error) {
+//
+// The returned teams are sorted by name.
+func (c *Client) ListTeams(ctx context.Context) ([]Team, error) {
 	entities, err := c.queryEntities(ctx, map[string]string{
 		"kind": "Group",
 	})
 	if err != nil {
 		return nil, err
 	}
+	// TODO: how to deal with this? `NoChangeError` and IgnoreNoChange?
 	if entities == nil {
 		return nil, nil
 	}
 
-	teams := []string{}
-	for _, v := range entities {
+	teams := []Team{}
+	for _, entity := range entities {
 		var spec teamSpec
-		if err := json.Unmarshal(v.Spec, &spec); err != nil {
-			return nil, fmt.Errorf("failed to parse entity %s: %w", v.Metadata.Name, err)
+		if err := json.Unmarshal(entity.Spec, &spec); err != nil {
+			return nil, fmt.Errorf("failed to parse entity %s: %w", entity.Metadata.Name, err)
 		}
 		if spec.Type == "team" {
-			teams = append(teams, v.Metadata.Name)
+			team := Team{
+				Name:        entity.Metadata.Name,
+				Namespace:   entity.Metadata.Namespace,
+				Description: entity.Metadata.Description,
+				UID:         entity.Metadata.UID,
+			}
+			for _, relation := range entity.Relations {
+				if relation.Type == "hasMember" && relation.Target.Kind == "user" {
+					team.Members = append(team.Members, TeamMember{Name: relation.Target.Name, Namespace: relation.Target.Namespace})
+				}
+			}
+			teams = append(teams, team)
 		}
 	}
-	sort.Strings(teams)
+	sort.Slice(teams, func(i, j int) bool { return teams[i].Name < teams[j].Name })
 
 	return teams, nil
 }
 
+// does the heavy lifting of querying the Backstage API
+//
+// returns a slice of entities, or nil if we get HTTP 304 Not Modified
 func (c *Client) queryEntities(ctx context.Context, filter map[string]string) ([]entity, error) {
 	apiURL, err := entitiesURL(c.BaseURL, filter)
 	if err != nil {
@@ -136,13 +177,4 @@ func entitiesURL(base string, filters map[string]string) (string, error) {
 
 type teamSpec struct {
 	Type string `json:"type"`
-}
-
-type entity struct {
-	Metadata struct {
-		Name        string `json:"name"`
-		Namespace   string `json:"namespace"`
-		Description string `json:"description"`
-	} `json:"metadata"`
-	Spec json.RawMessage
 }
