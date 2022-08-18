@@ -4,21 +4,17 @@ import (
 	"context"
 	"testing"
 
-	// metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	corev1 "k8s.io/api/core/v1"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
+	"k8s.io/apimachinery/pkg/types"
+	clientgoscheme "k8s.io/client-go/kubernetes/scheme"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/client/fake"
 
 	"github.com/gitops-tools/backstage-tenants-controller/pkg/backstage"
+	"github.com/google/go-cmp/cmp"
 )
-
-// ReconcileServiceAccounts ensures there is a ServiceAccount for each team.
-//
-// ServiceAccounts for removed teams will be removed.
-func ReconcileServiceAccounts(ctx context.Context, cl client.Client, teams []backstage.Team) error {
-
-	return nil
-}
 
 func TestReconcileServiceAccounts(t *testing.T) {
 	cl := newFakeClient(t)
@@ -33,30 +29,43 @@ func TestReconcileServiceAccounts(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
+
+	loaded := &corev1.ServiceAccount{}
+	if err := cl.Get(context.TODO(), types.NamespacedName{Name: "team-a", Namespace: "team-a"}, loaded); err != nil {
+		t.Fatal(err)
+	}
+	want := &corev1.ServiceAccount{
+		TypeMeta: metav1.TypeMeta{
+			Kind:       "ServiceAccount",
+			APIVersion: "v1",
+		},
+		ObjectMeta: metav1.ObjectMeta{
+			Name:            "team-a",
+			Namespace:       "team-a",
+			ResourceVersion: "1",
+			Labels: map[string]string{
+				"app.kubernetes.io/created-by": "backstage-tenants-controller",
+				"app.kubernetes.io/managed-by": "backstage",
+				"tenants.gitops.pro/team":      "team-a",
+			},
+		},
+	}
+
+	if diff := cmp.Diff(want, loaded); diff != "" {
+		t.Fatalf("didn't create service account correctly:\n%s", diff)
+	}
 }
 
-// func TestReconcileServiceAccounts_pruning(t *testing.T) {
-// 	acct := &corev1.ServiceAccount{
-// 		TypeMeta: metav1.TypeMeta{"v1", "ServiceAccount"},
-// 		ObjectMeta: metav1.ObjectMeta{
-// 			Name: "testing", Namespace: "testing",
-// 			Labels: map[string]string{
-// 				"gitops.pro/backstage-team": "testing",
-// 			},
-// 		},
-// 	}
-// 	cl := newFakeClient(t, acct)
-// 	teams := []backstage.Team{
-// 		{
-// 			Name:      "team-a",
-// 			Namespace: "default",
-// 		},
-// 	}
-// }
+func TestReconcileServiceAccounts_pruning(t *testing.T) {
+	t.Skip()
+}
 
 func newFakeClient(t *testing.T, objs ...runtime.Object) client.Client {
 	t.Helper()
 	scheme := runtime.NewScheme()
+	if err := clientgoscheme.AddToScheme(scheme); err != nil {
+		t.Fatal(err)
+	}
 	return fake.NewClientBuilder().
 		WithScheme(scheme).
 		WithRuntimeObjects(objs...).
