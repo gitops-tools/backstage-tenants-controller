@@ -6,9 +6,11 @@ import (
 
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/apimachinery/pkg/types"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 
 	"github.com/gitops-tools/backstage-tenants-controller/pkg/backstage"
+	"github.com/gitops-tools/pkg/sets"
 )
 
 const (
@@ -21,9 +23,16 @@ const (
 // ReconcileServiceAccounts ensures there is a ServiceAccount for each team.
 //
 // ServiceAccounts for removed teams will be removed.
+// TODO: logger!
 func ReconcileServiceAccounts(ctx context.Context, cl client.Client, teams []backstage.Team) error {
+	existingSAs, err := existingTeamServiceAccounts(ctx, cl)
+	if err != nil {
+		return err
+	}
+
+	newSAs := []corev1.ServiceAccount{}
 	for i := range teams {
-		sa := &corev1.ServiceAccount{
+		sa := corev1.ServiceAccount{
 			ObjectMeta: metav1.ObjectMeta{
 				Name:      teams[i].Name,
 				Namespace: teams[i].Name,
@@ -35,11 +44,39 @@ func ReconcileServiceAccounts(ctx context.Context, cl client.Client, teams []bac
 				},
 			},
 		}
+		newSAs = append(newSAs, sa)
+	}
 
-		if err := cl.Create(ctx, sa); err != nil {
+	for _, sa := range newSAs {
+		if err := cl.Create(ctx, &sa); err != nil {
 			return fmt.Errorf("creating ServiceAccount: %w", err)
 		}
 	}
 
+	namesToRemove := setFromServiceAccounts(existingSAs).Difference(setFromServiceAccounts(newSAs))
+	for _, sa := range namesToRemove.List() {
+		if err := cl.Delete(ctx, &corev1.ServiceAccount{ObjectMeta: metav1.ObjectMeta{Name: sa.Name, Namespace: sa.Namespace}}); err != nil {
+			return fmt.Errorf("pruning ServiceAccount: %w", err)
+		}
+	}
+
 	return nil
+}
+
+func setFromServiceAccounts(sas []corev1.ServiceAccount) sets.Set[types.NamespacedName] {
+	nameSet := sets.New[types.NamespacedName]()
+	for _, sa := range sas {
+		nameSet.Insert(client.ObjectKeyFromObject(&sa))
+	}
+	return nameSet
+
+}
+
+func existingTeamServiceAccounts(ctx context.Context, cl client.Client) ([]corev1.ServiceAccount, error) {
+	existingSAs := &corev1.ServiceAccountList{}
+	if err := cl.List(context.TODO(), existingSAs, client.HasLabels([]string{"tenants.gitops.pro/team"})); err != nil {
+		return nil, fmt.Errorf("listing existing ServiceAccounts: %w", err)
+	}
+	return existingSAs.Items, nil
+
 }
