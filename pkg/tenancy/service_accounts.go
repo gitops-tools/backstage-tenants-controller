@@ -5,6 +5,8 @@ import (
 	"fmt"
 
 	corev1 "k8s.io/api/core/v1"
+	"k8s.io/apimachinery/pkg/api/equality"
+	"k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/types"
 	"sigs.k8s.io/controller-runtime/pkg/client"
@@ -48,8 +50,23 @@ func ReconcileServiceAccounts(ctx context.Context, cl client.Client, teams []bac
 	}
 
 	for _, sa := range newSAs {
-		if err := cl.Create(ctx, &sa); err != nil {
-			return fmt.Errorf("creating ServiceAccount: %w", err)
+		existing := &corev1.ServiceAccount{}
+		err := cl.Get(ctx, client.ObjectKeyFromObject(&sa), existing)
+		if err != nil {
+			if !errors.IsNotFound(err) {
+				return fmt.Errorf("checking for existing ServiceAccount: %w", err)
+			}
+			if err := cl.Create(ctx, &sa); err != nil {
+				return fmt.Errorf("creating new ServiceAccount: %w", err)
+			}
+			continue
+		}
+
+		if !equality.Semantic.DeepDerivative(sa.GetLabels(), existing.GetLabels()) {
+			existing.SetLabels(sa.GetLabels())
+			if err := cl.Update(ctx, existing); err != nil {
+				return fmt.Errorf("updating existing ServiceAccount: %w", err)
+			}
 		}
 	}
 
