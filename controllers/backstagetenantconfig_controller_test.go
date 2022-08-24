@@ -21,6 +21,7 @@ import (
 	"testing"
 	"time"
 
+	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/kubernetes/scheme"
 	ctrl "sigs.k8s.io/controller-runtime"
@@ -96,6 +97,104 @@ func TestAPIs(t *testing.T) {
 		}
 	})
 
+	t.Run("successfully reconciling Namespaces", func(t *testing.T) {
+		ctx := context.TODO()
+		cfg := newTestConfig()
+		if err := k8sClient.Create(ctx, cfg); err != nil {
+			t.Fatal(err)
+		}
+		defer cleanupResource(t, k8sClient, cfg)
+
+		res, err := reconciler.Reconcile(ctx, ctrl.Request{NamespacedName: client.ObjectKeyFromObject(cfg)})
+		if err != nil {
+			t.Fatal(err)
+		}
+
+		if res.RequeueAfter != cfg.Spec.Interval.Duration {
+			t.Fatalf("got RequeueAfter %v, want %v", res.RequeueAfter, cfg.Spec.Interval)
+		}
+
+		updated := &tenantsv1.BackstageTenantConfig{}
+		if err := k8sClient.Get(ctx, client.ObjectKeyFromObject(cfg), updated); err != nil {
+			t.Fatal(err)
+		}
+		nsList := &corev1.NamespaceList{}
+		if err := k8sClient.List(ctx, nsList, client.HasLabels([]string{"tenants.gitops.pro/team"})); err != nil {
+			t.Fatal(err)
+		}
+		nsNames := []string{}
+		for _, v := range nsList.Items {
+			nsNames = append(nsNames, v.GetName())
+		}
+		for _, v := range updated.Status.TeamNames {
+			if !sliceContains(v, nsNames) {
+				t.Errorf("name %v, namespace missing", v)
+			}
+		}
+	})
+
+	t.Run("successfully reconciling ServiceAccounts", func(t *testing.T) {
+		ctx := context.TODO()
+		cfg := newTestConfig()
+		if err := k8sClient.Create(ctx, cfg); err != nil {
+			t.Fatal(err)
+		}
+		defer cleanupResource(t, k8sClient, cfg)
+
+		res, err := reconciler.Reconcile(ctx, ctrl.Request{NamespacedName: client.ObjectKeyFromObject(cfg)})
+		if err != nil {
+			t.Fatal(err)
+		}
+
+		if res.RequeueAfter != cfg.Spec.Interval.Duration {
+			t.Fatalf("got RequeueAfter %v, want %v", res.RequeueAfter, cfg.Spec.Interval)
+		}
+
+		updated := &tenantsv1.BackstageTenantConfig{}
+		if err := k8sClient.Get(ctx, client.ObjectKeyFromObject(cfg), updated); err != nil {
+			t.Fatal(err)
+		}
+		saList := &corev1.ServiceAccountList{}
+		if err := k8sClient.List(ctx, saList, client.HasLabels([]string{"tenants.gitops.pro/team"})); err != nil {
+			t.Fatal(err)
+		}
+		accountNames := []string{}
+		for _, v := range saList.Items {
+			accountNames = append(accountNames, v.GetName())
+		}
+		for _, v := range updated.Status.TeamNames {
+			if !sliceContains(v, accountNames) {
+				t.Errorf("name %v, service account missing", v)
+			}
+		}
+	})
+
+	t.Run("updating the inventory of created resources", func(t *testing.T) {
+		ctx := context.TODO()
+		cfg := newTestConfig()
+		if err := k8sClient.Create(ctx, cfg); err != nil {
+			t.Fatal(err)
+		}
+		defer cleanupResource(t, k8sClient, cfg)
+
+		res, err := reconciler.Reconcile(ctx, ctrl.Request{NamespacedName: client.ObjectKeyFromObject(cfg)})
+		if err != nil {
+			t.Fatal(err)
+		}
+
+		if res.RequeueAfter != cfg.Spec.Interval.Duration {
+			t.Fatalf("got RequeueAfter %v, want %v", res.RequeueAfter, cfg.Spec.Interval)
+		}
+
+		updated := &tenantsv1.BackstageTenantConfig{}
+		if err := k8sClient.Get(ctx, client.ObjectKeyFromObject(cfg), updated); err != nil {
+			t.Fatal(err)
+		}
+		if l := len(updated.Status.TenantInventory); l == 0 {
+			t.Fatalf("got no tenant inventory items")
+		}
+	})
+
 	t.Run("querying with current Etag", func(t *testing.T) {
 		ctx := context.TODO()
 		cfg := newTestConfig()
@@ -156,4 +255,13 @@ func newTestConfig() *tenantsv1.BackstageTenantConfig {
 			Interval: metav1.Duration{Duration: 5 * time.Second},
 		},
 	}
+}
+
+func sliceContains[T comparable](want T, elements []T) bool {
+	for _, v := range elements {
+		if v == want {
+			return true
+		}
+	}
+	return false
 }

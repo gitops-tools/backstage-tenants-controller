@@ -1,4 +1,4 @@
-package controllers
+package tenancy
 
 import (
 	"context"
@@ -31,11 +31,6 @@ func TestReconcileServiceAccounts(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-
-	loaded := &corev1.ServiceAccount{}
-	if err := cl.Get(context.TODO(), types.NamespacedName{Name: "team-a", Namespace: "team-a"}, loaded); err != nil {
-		t.Fatal(err)
-	}
 	want := &corev1.ServiceAccount{
 		TypeMeta: metav1.TypeMeta{
 			Kind:       "ServiceAccount",
@@ -51,6 +46,10 @@ func TestReconcileServiceAccounts(t *testing.T) {
 				"tenants.gitops.pro/team":      "team-a",
 			},
 		},
+	}
+	loaded := &corev1.ServiceAccount{}
+	if err := cl.Get(context.TODO(), types.NamespacedName{Name: "team-a", Namespace: "team-a"}, loaded); err != nil {
+		t.Fatal(err)
 	}
 
 	if diff := cmp.Diff(want, loaded); diff != "" {

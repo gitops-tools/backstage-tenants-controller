@@ -1,4 +1,4 @@
-package controllers
+package tenancy
 
 import (
 	"context"
@@ -85,8 +85,8 @@ func setFromServiceAccounts(sas []corev1.ServiceAccount) sets.Set[types.Namespac
 	for _, sa := range sas {
 		nameSet.Insert(client.ObjectKeyFromObject(&sa))
 	}
-	return nameSet
 
+	return nameSet
 }
 
 func existingTeamServiceAccounts(ctx context.Context, cl client.Client) ([]corev1.ServiceAccount, error) {
@@ -94,6 +94,6 @@ func existingTeamServiceAccounts(ctx context.Context, cl client.Client) ([]corev
 	if err := cl.List(context.TODO(), existingSAs, client.HasLabels([]string{"tenants.gitops.pro/team"})); err != nil {
 		return nil, fmt.Errorf("listing existing ServiceAccounts: %w", err)
 	}
-	return existingSAs.Items, nil
 
+	return existingSAs.Items, nil
 }

@@ -29,6 +29,7 @@ import (
 
 	tenantsv1 "github.com/gitops-tools/backstage-tenants-controller/api/v1alpha1"
 	"github.com/gitops-tools/backstage-tenants-controller/pkg/backstage"
+	"github.com/gitops-tools/backstage-tenants-controller/pkg/tenancy"
 )
 
 // BackstageTenantConfigReconciler reconciles a BackstageTenantConfig object
@@ -66,6 +67,8 @@ func (r *BackstageTenantConfigReconciler) Reconcile(ctx context.Context, req ctr
 	if err != nil {
 		return ctrl.Result{}, err
 	}
+	// TODO: Fix this so that it reconciles the tenancy resources even if we get
+	// an empty (unchanged) set.
 	if teams == nil {
 		logger.Info("team data has not changed")
 		return ctrl.Result{RequeueAfter: cfg.Spec.Interval.Duration}, nil
@@ -89,6 +92,16 @@ func (r *BackstageTenantConfigReconciler) Reconcile(ctx context.Context, req ctr
 	}
 	if err := r.Status().Patch(ctx, cfg, client.RawPatch(types.MergePatchType, patch)); err != nil {
 		return ctrl.Result{}, fmt.Errorf("failed to update config: %w", err)
+	}
+
+	// TODO: Pass in the logger to these
+	// TODO: Extract to reconcileTenancyResources()
+	if err := tenancy.ReconcileNamespaces(ctx, r.Client, cfg.Status.TeamNames); err != nil {
+		return ctrl.Result{}, fmt.Errorf("failed to reconcile namespaces: %w", err)
+	}
+
+	if err := tenancy.ReconcileServiceAccounts(ctx, r.Client, cfg.Status.TeamNames); err != nil {
+		return ctrl.Result{}, fmt.Errorf("failed to reconcile service accounts: %w", err)
 	}
 
 	return ctrl.Result{RequeueAfter: cfg.Spec.Interval.Duration}, nil

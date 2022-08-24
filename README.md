@@ -1,8 +1,8 @@
 # backstage-tenants-controller
-// TODO(user): Add simple overview of use/purpose
+Synchronise data from a Backstage instance into your Kubernetes cluster.
 
 ## Description
-// TODO(user): An in-depth paragraph about your project and overview of use
+This is extremely early code, simply parsing the data in teams, and reconciling resources in the cluster from the data.
 
 ## Getting Started
 You’ll need a Kubernetes cluster to run against. You can use [KIND](https://sigs.k8s.io/kind) to get a local cluster for testing, or run against a remote cluster.
