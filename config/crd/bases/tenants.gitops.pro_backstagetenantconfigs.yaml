@@ -62,36 +62,6 @@ spec:
                 items:
                   type: string
                 type: array
-              tenantInventory:
-                additionalProperties:
-                  description: TenantResourceInventory contains a list of Kubernetes
-                    resource object references that have been created for tenants.
-                  properties:
-                    entries:
-                      description: Entries of Kubernetes resource object references.
-                      items:
-                        description: ResourceRef contains the information necessary
-                          to locate a resource within a cluster.
-                        properties:
-                          id:
-                            description: ID is the string representation of the Kubernetes
-                              resource object's metadata, in the format '<namespace>_<name>_<group>_<kind>'.
-                            type: string
-                          v:
-                            description: Version is the API version of the Kubernetes
-                              resource object's kind.
-                            type: string
-                        required:
-                        - id
-                        - v
-                        type: object
-                      type: array
-                  required:
-                  - entries
-                  type: object
-                description: TenantInventory is a mapping from team to the resources
-                  generated as a Tenant.
-                type: object
             required:
             - lastEtag
             type: object

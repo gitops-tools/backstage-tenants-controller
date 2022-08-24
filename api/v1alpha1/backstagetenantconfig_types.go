@@ -35,30 +35,10 @@ type BackstageTenantConfigSpec struct {
 	Interval metav1.Duration `json:"interval"`
 }
 
-// TenantResourceInventory contains a list of Kubernetes resource object references
-// that have been created for tenants.
-type TenantResourceInventory struct {
-	// Entries of Kubernetes resource object references.
-	Entries []ResourceRef `json:"entries"`
-}
-
-// ResourceRef contains the information necessary to locate a resource within a cluster.
-type ResourceRef struct {
-	// ID is the string representation of the Kubernetes resource object's metadata,
-	// in the format '<namespace>_<name>_<group>_<kind>'.
-	ID string `json:"id"`
-
-	// Version is the API version of the Kubernetes resource object's kind.
-	Version string `json:"v"`
-}
-
 // BackstageTenantConfigStatus defines the observed state of BackstageTenantConfig
 type BackstageTenantConfigStatus struct {
 	// TeamNames are the teams discovered from the Backstage API.
 	TeamNames []string `json:"teamNames,omitempty"`
-	// TenantInventory is a mapping from team to the resources generated as a
-	// Tenant.
-	TenantInventory map[string]TenantResourceInventory `json:"tenantInventory,omitempty"`
 
 	// LastEtag is the last recorded etag header from the upstream API.
 	LastEtag string `json:"lastEtag"`

@@ -50,6 +50,7 @@ func (r *BackstageTenantConfigReconciler) Reconcile(ctx context.Context, req ctr
 	// TODO: metrics!
 	// TODO: observedGeneration
 	// TODO: handle deleted configs
+	// TODO: Capture the inventory
 
 	cfg := &tenantsv1.BackstageTenantConfig{}
 	if err := r.Get(ctx, req.NamespacedName, cfg); err != nil {
@@ -96,11 +97,11 @@ func (r *BackstageTenantConfigReconciler) Reconcile(ctx context.Context, req ctr
 
 	// TODO: Pass in the logger to these
 	// TODO: Extract to reconcileTenancyResources()
-	if err := tenancy.ReconcileNamespaces(ctx, r.Client, cfg.Status.TeamNames); err != nil {
+	if err := tenancy.ReconcileNamespaces(ctx, r.Client, teams); err != nil {
 		return ctrl.Result{}, fmt.Errorf("failed to reconcile namespaces: %w", err)
 	}
 
-	if err := tenancy.ReconcileServiceAccounts(ctx, r.Client, cfg.Status.TeamNames); err != nil {
+	if err := tenancy.ReconcileServiceAccounts(ctx, r.Client, teams); err != nil {
 		return ctrl.Result{}, fmt.Errorf("failed to reconcile service accounts: %w", err)
 	}
 

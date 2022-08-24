@@ -4,6 +4,15 @@ Synchronise data from a Backstage instance into your Kubernetes cluster.
 ## Description
 This is extremely early code, simply parsing the data in teams, and reconciling resources in the cluster from the data.
 
+## Ideas
+
+ - [ ] Custom TLS client for accessing Backstage
+ - [ ] More tenancy features
+   - [ ] Namespaces?
+   - [ ] Team member RBAC
+   - [ ] Integration with the Prometheus operator for Services
+   - [ ] Backend API for tenancy for a front-end plugin?
+
 ## Getting Started
 You’ll need a Kubernetes cluster to run against. You can use [KIND](https://sigs.k8s.io/kind) to get a local cluster for testing, or run against a remote cluster.
 **Note:** Your controller will automatically use the current context in your kubeconfig file (i.e. whatever cluster `kubectl cluster-info` shows).
