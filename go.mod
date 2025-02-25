@@ -4,7 +4,7 @@ go 1.18
 
 require (
 	github.com/gitops-tools/pkg v0.2.0
-	github.com/google/go-cmp v0.6.0
+	github.com/google/go-cmp v0.7.0
 	k8s.io/api v0.28.1
 	k8s.io/apimachinery v0.28.1
 	k8s.io/client-go v0.28.1
