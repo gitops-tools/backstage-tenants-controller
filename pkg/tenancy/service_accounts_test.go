@@ -32,10 +32,6 @@ func TestReconcileServiceAccounts(t *testing.T) {
 		t.Fatal(err)
 	}
 	want := &corev1.ServiceAccount{
-		TypeMeta: metav1.TypeMeta{
-			Kind:       "ServiceAccount",
-			APIVersion: "v1",
-		},
 		ObjectMeta: metav1.ObjectMeta{
 			Name:            "team-a",
 			Namespace:       "team-a",
@@ -53,7 +49,7 @@ func TestReconcileServiceAccounts(t *testing.T) {
 	}
 
 	if diff := cmp.Diff(want, loaded); diff != "" {
-		t.Fatalf("didn't create service account correctly:\n%s", diff)
+		t.Errorf("didn't create service account correctly:\n%s", diff)
 	}
 }
 
@@ -104,16 +100,12 @@ func TestReconcileServiceAccounts_preexisting(t *testing.T) {
 	}
 
 	if diff := cmp.Diff(want, updated, ignoreResourceVersion()); diff != "" {
-		t.Fatalf("failed to update ServiceAccount:\n%s", diff)
+		t.Errorf("failed to update ServiceAccount:\n%s", diff)
 	}
 }
 
 func TestReconcileServiceAccounts_pruning(t *testing.T) {
 	existing := &corev1.ServiceAccount{
-		TypeMeta: metav1.TypeMeta{
-			Kind:       "ServiceAccount",
-			APIVersion: "v1",
-		},
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      "team-b",
 			Namespace: "team-b",
@@ -143,11 +135,12 @@ func TestReconcileServiceAccounts_pruning(t *testing.T) {
 	}
 
 	if l := len(saList.Items); l != 1 {
-		t.Fatalf("got %d ServiceAccounts, want 1 (%v)", l, resourceNames(t, saList))
+		t.Errorf("got %d ServiceAccounts, want 1 (%v)", l, resourceNames(t, saList))
 	}
 }
 
 func resourceNames(t *testing.T, list runtime.Object) []string {
+	t.Helper()
 	names := []string{}
 	err := meta.EachListItem(list, func(obj runtime.Object) error {
 		names = append(names, obj.(client.Object).GetName())
@@ -156,6 +149,7 @@ func resourceNames(t *testing.T, list runtime.Object) []string {
 	if err != nil {
 		t.Fatal(err)
 	}
+
 	return names
 }
 

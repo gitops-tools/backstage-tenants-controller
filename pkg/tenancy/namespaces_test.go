@@ -71,10 +71,6 @@ func TestReconcileNamespaces_preexisting(t *testing.T) {
 	}
 
 	want := &corev1.Namespace{
-		TypeMeta: metav1.TypeMeta{
-			Kind:       "Namespace",
-			APIVersion: "v1",
-		},
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      "team-b",
 			Namespace: "team-b",

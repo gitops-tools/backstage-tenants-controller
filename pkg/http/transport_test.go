@@ -56,7 +56,7 @@ func TestTransportFromSecret_no_CA(t *testing.T) {
 
 	client := http.Client{Transport: transport}
 	_, err = client.Get(ts.URL)
-	test.AssertErrorMatch(t, "certificate is not trusted", err)
+	test.AssertErrorMatch(t, "certificate signed by unknown authority", err)
 }
 
 func secretDataFromTLSConfig(t *testing.T, c *tls.Config) map[string][]byte {

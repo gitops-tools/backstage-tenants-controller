@@ -1,6 +1,7 @@
 module github.com/gitops-tools/backstage-tenants-controller
 
-go 1.18
+go 1.23.0
+
 toolchain go1.24.1
 
 require (
