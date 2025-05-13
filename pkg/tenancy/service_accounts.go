@@ -91,7 +91,7 @@ func setFromServiceAccounts(sas []corev1.ServiceAccount) sets.Set[types.Namespac
 
 func existingTeamServiceAccounts(ctx context.Context, cl client.Client) ([]corev1.ServiceAccount, error) {
 	existingSAs := &corev1.ServiceAccountList{}
-	if err := cl.List(context.TODO(), existingSAs, client.HasLabels([]string{"tenants.gitops.pro/team"})); err != nil {
+	if err := cl.List(ctx, existingSAs, client.HasLabels([]string{"tenants.gitops.pro/team"})); err != nil {
 		return nil, fmt.Errorf("listing existing ServiceAccounts: %w", err)
 	}
 
