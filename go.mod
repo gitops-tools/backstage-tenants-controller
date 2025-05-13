@@ -1,12 +1,13 @@
 module github.com/gitops-tools/backstage-tenants-controller
 
-go 1.23.0
+go 1.24.0
+
 toolchain go1.24.1
 
 require (
 	github.com/gitops-tools/pkg v0.2.0
 	github.com/google/go-cmp v0.7.0
-	k8s.io/api v0.32.3
+	k8s.io/api v0.33.0
 	k8s.io/apimachinery v0.33.0
 	k8s.io/client-go v0.32.3
 	sigs.k8s.io/controller-runtime v0.20.4
