@@ -7,8 +7,8 @@ toolchain go1.24.1
 require (
 	github.com/gitops-tools/pkg v0.2.0
 	github.com/google/go-cmp v0.7.0
-	k8s.io/api v0.33.0
-	k8s.io/apimachinery v0.33.0
+	k8s.io/api v0.33.1
+	k8s.io/apimachinery v0.33.1
 	k8s.io/client-go v0.33.0
 	sigs.k8s.io/controller-runtime v0.20.4
 )
